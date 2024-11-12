@@ -57,8 +57,7 @@ abstract class TweetSet extends TweetSetInterface:
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def union(that: TweetSet): TweetSet = ???
-
+  def union(that: TweetSet): TweetSet
   /**
    * Returns the tweet from this set which has the greatest retweet count.
    *
@@ -116,6 +115,10 @@ abstract class TweetSet extends TweetSetInterface:
   def foreach(f: Tweet => Unit): Unit
 
 class Empty extends TweetSet:
+  
+  def union(that: TweetSet): TweetSet = 
+    that
+
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = 
     Empty()
   
@@ -136,7 +139,14 @@ class Empty extends TweetSet:
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
 
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
+  def union(that: TweetSet): TweetSet = 
+    that.foreach((x:Tweet)=>this.incl(x))
+    this
+
+  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = 
+    if(p(elem)) acc.incl(elem)
+    left.filterAcc(p,acc)
+    right.filterAcc(p,acc)
 
 
   def mostRetweeted: Tweet = 
@@ -198,14 +208,14 @@ object GoogleVsApple:
   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
-  lazy val googleTweets: TweetSet = ???
-  lazy val appleTweets: TweetSet = ???
+  lazy val googleTweets: TweetSet = TweetReader.allTweets.filter((x:Tweet) => google.exists(x.text.contains))
+  lazy val appleTweets: TweetSet = TweetReader.allTweets.filter((x:Tweet) => apple.exists(x.text.contains))
 
   /**
    * A list of all tweets mentioning a keyword from either apple or google,
    * sorted by the number of retweets.
    */
-  lazy val trending: TweetList = ???
+  lazy val trending: TweetList = TweetReader.allTweets.descendingByRetweet
 
 object Main extends App:
   // Print the trending tweets

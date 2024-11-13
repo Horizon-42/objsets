@@ -42,9 +42,7 @@ abstract class TweetSet extends TweetSetInterface:
    * we should implement here, for simplicity
    */
   def filter(p: Tweet => Boolean): TweetSet = 
-    var acc = Empty()
-    filterAcc(p,acc)
-    acc
+    filterAcc(p, Empty())
 
   /**
    * This is a helper method for `filter` that propagates the accumulated tweets.
@@ -120,7 +118,7 @@ class Empty extends TweetSet:
     that
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = 
-    Empty()
+    acc
   
   def mostRetweeted: Tweet = 
     throw java.util.NoSuchElementException()
@@ -140,13 +138,16 @@ class Empty extends TweetSet:
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
 
   def union(that: TweetSet): TweetSet = 
-    that.foreach((x:Tweet)=>this.incl(x))
-    this
+    // var newSet:TweetSet = this
+    // that.foreach((x:Tweet) => newSet = newSet.incl(x))
+    // newSet
+    left.union(right).union(that).incl(elem)
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = 
-    if(p(elem)) acc.incl(elem)
-    left.filterAcc(p,acc)
-    right.filterAcc(p,acc)
+    var res = acc
+    if p(elem) then res = acc.incl(elem)
+    left.filterAcc(p, res).union(right.filterAcc(p, res))
+   
 
 
   def mostRetweeted: Tweet = 
@@ -218,5 +219,18 @@ object GoogleVsApple:
   lazy val trending: TweetList = TweetReader.allTweets.descendingByRetweet
 
 object Main extends App:
+  val set1 = Empty()
+  val set2 = set1.incl(Tweet("a", "a body", 20))
+  val set3 = set2.incl(Tweet("b", "b body", 20))
+  val c = Tweet("c", "c body", 7)
+  val d = Tweet("d", "d body", 9)
+  val set4c = set3.incl(c)
+  val set4d = set3.incl(d)
+  val set5 = set4c.incl(d)
+  
+  set5 foreach println
+  println("--------------------")
+  set5.filter(tw => tw.user == "a") foreach println
+
   // Print the trending tweets
-  GoogleVsApple.trending foreach println
+  // GoogleVsApple.trending foreach println

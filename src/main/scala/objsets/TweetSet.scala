@@ -138,10 +138,10 @@ class Empty extends TweetSet:
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
 
   def union(that: TweetSet): TweetSet = 
-    // var newSet:TweetSet = this
-    // that.foreach((x:Tweet) => newSet = newSet.incl(x))
-    // newSet
-    left.union(right).union(that).incl(elem)
+    var newSet:TweetSet = this
+    that.foreach((x:Tweet) => newSet = newSet.incl(x))
+    newSet
+    // left.union(right).union(that).incl(elem)
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = 
     var res = acc
